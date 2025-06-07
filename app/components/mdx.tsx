@@ -107,3 +107,15 @@ export function CustomMDX(props) {
     />
   )
 }
+
+export function Tags(props: { tags: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {props.tags.map((tag) => (
+        <span key={tag} className="px-2 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+          {tag}
+        </span>
+      ))}
+    </div>
+  )
+}

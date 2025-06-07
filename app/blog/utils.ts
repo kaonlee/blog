@@ -1,12 +1,15 @@
 import fs from 'fs'
 import path from 'path'
+import { z } from 'zod'
 
-type Metadata = {
-  title: string
-  publishedAt: string
-  summary: string
-  image?: string
-}
+const metadataSchema = z.object({
+  title: z.string(),
+  tags: z.array(z.string()).optional(),
+  publishedAt: z.string(),
+  summary: z.string(),
+  image: z.string().optional(),
+})
+type Metadata = z.infer<typeof metadataSchema>
 
 function parseFrontmatter(fileContent: string) {
   let frontmatterRegex = /---\s*([\s\S]*?)\s*---/
@@ -14,16 +17,23 @@ function parseFrontmatter(fileContent: string) {
   let frontMatterBlock = match![1]
   let content = fileContent.replace(frontmatterRegex, '').trim()
   let frontMatterLines = frontMatterBlock.trim().split('\n')
-  let metadata: Partial<Metadata> = {}
+  let partialMetadata:Partial<Metadata> = {}
 
   frontMatterLines.forEach((line) => {
     let [key, ...valueArr] = line.split(': ')
-    let value = valueArr.join(': ').trim()
-    value = value.replace(/^['"](.*)['"]$/, '$1') // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value
+    let rawValue = valueArr.join(': ').trim()
+    switch (key) {
+      case 'tags':
+        partialMetadata.tags = rawValue.split(',').map((tag) => tag.trim())
+        break
+      default:
+        const value = rawValue.replace(/^['"](.*)['"]$/, '$1') // Remove quotes
+        partialMetadata[key] = value
+    }
   })
-
-  return { metadata: metadata as Metadata, content }
+  
+  const metadata = metadataSchema.parse(partialMetadata)
+  return { metadata, content }
 }
 
 function getMDXFiles(dir) {
