@@ -14,4 +14,4 @@ This is my personal blog site, sharing life, learning, and coding notes.
 - MDX
 
 ## Deployment
-*WIP*
+https://kaonlee.github.io/blog/
