@@ -1,0 +1,95 @@
+---
+title: '三分鐘！部署 Next.js Blog 到 GitHub Pages'
+tags: note, deploy, nextjs, github-pages
+publishedAt: '2025-06-08'
+summary: '內容網站？選 SSR / SSG 支援的框架準沒錯！部署在 GitHub Page 上，必須是靜態網站。這篇文章將教你超簡單把 Next.js 開發的靜態網站部署在 GitHub Pages 上。'
+---
+
+想架設部落格這類的內容網站，技術上自然首選 SEO 更好、支援靜態網站的框架，例如 Next.js 或 Nuxt.js 都是非常不錯的選擇。
+這篇文章將教你超簡單把 Next.js 開發的靜態網站部署在 GitHub Pages 上。
+
+## 第 0 步：開始你的 Next.js 專案
+你或許已經在 [Next.js Starter Templates & Themes | Vercel](https://vercel.com/templates/next.js) 找好你想開始的那套模板。
+例如這個 Blog：就選了[Next.js Portfolio with Blog](https://vercel.com/templates/portfolio/nextjs-portfolio)作為起點。
+
+## 第 1 步：Build 出你的靜態網站：Static Export
+
+參考官方文件 [Guides: Static Exports | Next.js](https://nextjs.org/docs/pages/guides/static-exports)　一步步build 出我們的靜態網站
+
+> Since Next.js supports this static export, it can be deployed and hosted on any web server that can serve HTML/CSS/JS static assets.
+
+走起
+
+### 1-1 修改你的 `next.config.js`
+這時候你可能舉手大叫「老師！我沒看到這個檔案啊！」，請直接建立一個在跟目錄底下。
+
+如果直接將
+```js
+/**
+ * @type {import('next').NextConfig}
+ */
+const nextConfig = {
+  output: 'export',
+  distDir: 'dist', // 這裡我希望 distDir 不是預設的 out, 而是 dist
+}
+
+module.exports = nextConfig
+```
+貼上並輸出的話，有可能會出現錯誤。
+
+### 1-2 處理錯誤
+
+#### exclude Server-side API Route: OG
+我出現的錯誤就是：Error occurred prerendering page "/og". Read more: https://nextjs.org/docs/messages/prerender-error
+
+看了一下，`app/og/route.tsx` 是使用了 [Vercel 的 Open Graph (OG) Image Generation](https://vercel.com/docs/og-image-generation)，的**Server-side API Route**，目的是提供 **外部 runtime request** 使用，每次有 request 才動態產生 [OG](https://ogp.me/)用的。
+
+目前我們 Blog 先不需要做 OG，可以==直接移除==。
+
+#### 其他錯誤：參考 Possible solutions
+好像在說廢話。但 Next.js 的錯誤訊息非常友善，可以直接參考處理。
+
+### 1-3 重新 Build 一次，直到成功
+沒有成功，就繼續處理錯誤。
+成功的話，代表之後 build 的話可以成功！這時我們不需要保留 `/dist` 或 `/out` 資料夾裡面的東西，因為我們要在 CI 的時候讓他自動執行。
+
+## 第 2 步：部署上 GitHub Pages
+
+### 2-1 推上你的 GitHub Repo 上
+要建立[GitHub Pages](https://pages.github.com/)，當然要推上你自己的 GitHub Repo上面。
+
+### 2-2 設定 GitHub Pages
+進入到程式碼所在的 Repo，
+1. 選擇 `Settings > Pages`
+2. Source 選擇 `GitHub Actions` -> 這時，下面就會檢驗出有 Next.js 部署的模板
+3. 在 Next.js 模板下點擊 `config` 
+4. 加入模板
+5. 修改 config
+
+Next.js 部署的模板算是==開箱即用==，但我是使用 pnpm 安裝並將 path 有自定義，所以需要修改
+##### 修改 path：
+預設為 `/out`，我改為`/dist` 所以要修改，如果沒有改設定的話，就不用動了
+##### 改 runner：
+由於 ubuntu 預設是沒有 pnpm 的，所以先在 checkout 後新增
+ ```yml
+		- name: Setup pnpm
+		uses: pnpm/action-setup@v2
+		with:
+		version: 9
+```
+ 再來改 runner
+```yml
+		- name: Detect package manager
+		id: detect-package-manager
+		run: |
+		echo "manager=pnpm" >> $GITHUB_OUTPUT
+		echo "command=install" >> $GITHUB_OUTPUT
+		echo "runner=pnpm" >> $GITHUB_OUTPUT
+		exit 0
+```
+
+## 完成：推上 repo 觸發 deployment 吧
+都完成之後，就大功告成了！以後只要有修改，都可以自動部署囉。
+以前還在研究 Hexo 部落格如何使用，架完覺得 Next 用起來更加直覺彈性。
+
+真是開心 ( ⁎ᵕᴗᵕ⁎ )❤︎
