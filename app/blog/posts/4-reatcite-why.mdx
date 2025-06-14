@@ -1,9 +1,11 @@
 ---
-title: 'D250611'
+title: '25-06-Daily'
 tags: daily
 publishedAt: '2025-06-11'
 summary: '反省對敏捷經甚麼處理'
 ---
+
+### 0611
 
 最近 Coding 練習時，發現初期想很多 [規格](http://localhost:3000/blog/3-mini-city-game-0) 結果實作的時候腦筋有點空白。
 
@@ -11,6 +13,47 @@ summary: '反省對敏捷經甚麼處理'
 
 敏捷精神的話強調最快最小交付，這點是不能忘記的。
 
-覺得自己有點再耍白癡，被 Vue Reactive 搞傻，自己 [測試](https://github.com/kaonlee/vue3-app/blob/main/src/views/ReactiveTest.vue) 又都跟預想的一樣運作，覺得很煩惱。 :'(
+覺得自己有點再耍白癡，被 Vue Reactive 搞傻，自己 [測試](https://github.com/kaonlee/vue3-app/commit/2d8d9d8e8ef7093e8c60994b2fdeafe8a04634da) 又都跟預想的一樣運作，覺得很煩惱。 :'(
 
 這幾天一定要突破他 ..... 加油！
+
+##### 0614 update
+
+搞懂了 [Vue Reactive](https://github.com/kaonlee/vue3-app/blob/main/src/views/ReactiveTest.vue)  由 Vue 觸發機制才會有完整的監聽。
+
+實際的例子為：
+
+設計了一個 GameLoop 的 Class
+
+因為在 Class 中使用了 [requestAnimationFrame()](https://developer.mozilla.org/zh-TW/docs/Web/API/Window/requestAnimationFrame) ，由於傳入的用例會是
+
+```js
+requestAnimationFrame(this.tick) // this.tick is a method of Class
+```
+
+直接使用的話 this 會指向 requestAnimationFrame 的 this (window)。
+故需要綁定 `this.tick = this.tick.bind(this)`
+
+也因此會觸發無法及時 reactive 的問題。
+
+之後應該寫一篇筆記來記錄這件事情。
+
+---
+
+### 0613
+
+身為職業工程師跟職業作家一樣，時時要回顧一下自己寫的文字跟他人寫的文字，盡量細細咀嚼。
+
+進入到公司後發現自己的進步幅度變少了，學習曲線不高的時候其實就是一個警訊。高手跟普通人的差別大概是「高手會時刻練習」的職業心態吧。
+
+每日反省三件事，每日感謝三件事，相信可以成為更好的自己。
+
+反省三件事太私密就留給自己，網站上寫感謝的事情就好。
+
+> 感謝提醒自己的友人提醒了自己的弱點與建議 / 感謝自己開始面對問題 / 感謝姐姐的情緒支持永遠愛她
+
+---
+
+### 0614
+
+明天要準備去日本岡山旅遊!! GOGO!!
